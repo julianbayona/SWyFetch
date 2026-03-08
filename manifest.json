@@ -1,0 +1,27 @@
+{
+  "name": "GastoSmart - Control de Gastos",
+  "short_name": "GastoSmart",
+  "description": "Aplicación PWA para gestión inteligente de gastos personales con presupuestos y gráficos",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#2d6a4f",
+  "orientation": "portrait-primary",
+  "lang": "es",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    {
+      "src": "./src/img/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./src/img/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

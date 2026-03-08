@@ -1,16 +1,97 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,
-initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Mi PWA</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2d6a4f">
+  <title>Sin Conexión – GastoSmart</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f0f2f5;
+      color: #212529;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+
+    .icon { font-size: 4.5rem; margin-bottom: 1rem; }
+
+    h1 {
+      font-size: 1.6rem;
+      color: #2d6a4f;
+      margin-bottom: 0.75rem;
+    }
+
+    p {
+      color: #6c757d;
+      line-height: 1.6;
+      max-width: 340px;
+      margin-bottom: 1.2rem;
+    }
+
+    .pill {
+      display: inline-block;
+      background: #d8f3dc;
+      color: #1b4332;
+      border-radius: 50px;
+      padding: 0.3rem 1rem;
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.75rem 2rem;
+      background: #2d6a4f;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-back:hover { background: #40916c; color: #fff; }
+
+    .status {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: #adb5bd;
+    }
+  </style>
 </head>
+<body>
+  <div class="icon">📶</div>
+  <h1>Sin Conexión</h1>
+  <span class="pill">Modo offline activo</span>
+  <p>
+    No hay conexión a internet disponible en este momento.
+    Sus datos locales siguen accesibles dentro de la aplicación.
+  </p>
+  <p>
+    GastoSmart almacena todos sus gastos y presupuestos en su dispositivo,
+    por lo que puede seguir consultando su información sin red.
+  </p>
+  <a href="/" class="btn-back" onclick="history.back(); return false;">
+    ← Volver a GastoSmart
+  </a>
+  <p class="status" id="status-msg">Esperando conexión…</p>
 
-<body class="container p-3">
-    <h1>Modo Offline</h1>
+  <script>
+    // Redirigir automáticamente cuando regrese la conexión
+    window.addEventListener('online', () => {
+      document.getElementById('status-msg').textContent = '¡Conexión restaurada! Redirigiendo…';
+      setTimeout(() => { window.location.href = '/'; }, 1200);
+    });
+  </script>
 </body>
-
 </html>

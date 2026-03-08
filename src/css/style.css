@@ -1,45 +1,160 @@
-/* Basic CSS Styles */
+/* ============================================================
+   GastoSmart – Estilos personalizados
+   ============================================================ */
 
+:root {
+  --gs-green:   #2d6a4f;
+  --gs-green2:  #40916c;
+  --gs-light:   #d8f3dc;
+  --gs-dark:    #1b4332;
+  --card-radius: 12px;
+}
+
+/* ---- Body ---- */
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #7e7edb;
-    color: #333;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background-color: #f0f2f5;
+  color: #212529;
 }
 
-header {
-    background-color: #0078d7;
-    color: white;
-    padding: 1rem;
-    text-align: center;
+/* ---- Navbar ---- */
+.navbar-brand {
+  font-size: 1.2rem;
+  letter-spacing: 0.5px;
 }
 
-h1 {
-    font-size: 2rem;
-    margin: 0;
+/* ---- Tabs ---- */
+.nav-tabs {
+  border-bottom: 2px solid #dee2e6;
+}
+.nav-tabs .nav-link {
+  font-size: 0.72rem;
+  padding: 0.45rem 0.3rem;
+  color: #6c757d;
+  border-radius: var(--card-radius) var(--card-radius) 0 0;
+  border: 1px solid transparent;
+  transition: color 0.2s;
+}
+.nav-tabs .nav-link i {
+  font-size: 1.1rem;
+  display: block;
+  margin-bottom: 2px;
+}
+.nav-tabs .nav-link.active {
+  color: var(--gs-green);
+  font-weight: 700;
+  border-color: #dee2e6 #dee2e6 white;
+  background: white;
 }
 
-p {
-    line-height: 1.6;
-    margin: 1rem 0;
+/* ---- Cards ---- */
+.card {
+  border: none;
+  border-radius: var(--card-radius);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+.card-header {
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.65rem 1rem;
 }
 
-a {
-    color: #0078d7;
-    text-decoration: none;
+/* ---- Summary cards ---- */
+.card[style*="background:#2d6a4f"],
+.card.bg-danger,
+.card[style*="background:#0077b6"],
+.card.bg-warning {
+  border-radius: var(--card-radius);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
 }
 
-a:hover {
-    text-decoration: underline;
+/* ---- Progress bars ---- */
+.progress {
+  border-radius: 8px;
+  background-color: #e9ecef;
+}
+.progress-bar {
+  border-radius: 8px;
+  transition: width 0.5s ease;
 }
 
-footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 1rem;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
+/* ---- Quick-category buttons ---- */
+.quick-btn {
+  border-radius: 10px !important;
+  transition: background-color 0.15s, color 0.15s, transform 0.1s;
+  font-size: 0.75rem;
+}
+.quick-btn:hover,
+.quick-btn:active {
+  background-color: var(--gs-green) !important;
+  border-color: var(--gs-green) !important;
+  color: #fff !important;
+  transform: scale(1.04);
+}
+
+/* ---- List items ---- */
+.list-group-item {
+  border-left: none;
+  border-right: none;
+  font-size: 0.9rem;
+}
+.list-group-item:first-child { border-top: none; }
+
+/* ---- Badges in lists ---- */
+.badge[style] {
+  font-size: 0.7rem;
+  padding: 0.35em 0.65em;
+}
+
+/* ---- Offline banner ---- */
+#offline-banner {
+  z-index: 1050;
+  font-size: 0.85rem;
+  border-radius: 0 !important;
+}
+
+/* ---- Toast ---- */
+#app-toast {
+  min-width: 220px;
+  border-radius: 10px;
+}
+
+/* ---- Charts ---- */
+canvas {
+  display: block;
+  width: 100% !important;
+}
+
+/* ---- Forms ---- */
+.form-control, .form-select {
+  border-radius: 8px;
+}
+.input-group .input-group-text {
+  background-color: #f8f9fa;
+  border-radius: 8px 0 0 8px;
+}
+
+/* ---- Budget allocated summary ---- */
+#budget-alloc-summary {
+  font-size: 0.85rem;
+  border-radius: 8px;
+}
+
+/* ---- Category budget inputs ---- */
+.cat-inp {
+  border-radius: 0 8px 8px 0 !important;
+}
+
+/* ---- Delete button in list ---- */
+.del-btn {
+  flex-shrink: 0;
+}
+
+/* ---- Responsive tweaks ---- */
+@media (max-width: 380px) {
+  .nav-tabs .nav-link { font-size: 0.65rem; padding: 0.35rem 0.2rem; }
+  .card-header { font-size: 0.82rem; }
 }
