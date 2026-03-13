@@ -9,6 +9,7 @@ import { renderDashboard } from './dashboard.js';
 import { initExpenseForm } from './expense-form.js';
 import { initBudgetForm } from './budget-form.js';
 import { initHistory, renderHistory } from './history.js';
+import { initReports, renderReports } from './reports.js';
 
 // ==================== SERVICE WORKER ====================
 if ('serviceWorker' in navigator) {
@@ -55,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initExpenseForm();
   initBudgetForm();
   initHistory();
+  initReports();
   renderDashboard();
 
   document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab =>
@@ -62,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const target = evt.target.getAttribute('data-bs-target');
       if (target === '#tab-dashboard') renderDashboard();
       if (target === '#tab-history')   renderHistory();
+      if (target === '#tab-reports')   renderReports();
     })
   );
 });

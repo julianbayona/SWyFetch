@@ -22,13 +22,16 @@ const APP_SHELL = [
   './src/js/expense-form.js',
   './src/js/budget-form.js',
   './src/js/history.js',
+  './src/js/reports.js',
+  './src/js/excel-export.js',
   './src/pages/offline.html',
   './src/img/icon-192.svg',
   './src/img/icon-512.svg',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js',
   'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'
+  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
+  'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
 ];
 
 // ==================== INSTALL ====================
