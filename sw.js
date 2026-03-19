@@ -1,17 +1,21 @@
 // ============================================================
 //  GastoSmart – Service Worker
-//  Estrategias: Cache-First (App Shell) + Network-First (resto)
+//  Estrategias implementadas:
+//  1) Cache Only
+//  2) Cache with network fallback
+//  3) Network with cache fallback
 // ============================================================
 
-const CACHE_VERSION = 'v1';
-const CACHE_NAME  = `gastosmart-${CACHE_VERSION}`;
+const CACHE_VERSION = 'v5';
+const CACHE_STATIC_NAME = `gastosmart-static-${CACHE_VERSION}`;
+const CACHE_DYNAMIC_NAME = `gastosmart-dynamic-${CACHE_VERSION}`;
+const DYNAMIC_CACHE_LIMIT = 50;
 
 /** Recursos del App Shell que se precargan en la instalación */
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
-  './src/css/style.css',
   './src/js/app.js',
   './src/js/constants.js',
   './src/js/helpers.js',
@@ -39,7 +43,7 @@ self.addEventListener('install', event => {
   console.log('[SW] Instalando – versión:', CACHE_VERSION);
 
   event.waitUntil(
-    caches.open(CACHE_NAME)
+    caches.open(CACHE_STATIC_NAME)
       .then(cache => {
         console.log('[SW] Precargando App Shell en caché…');
         // addAll falla si algún recurso no responde; usamos Promise.allSettled
@@ -66,7 +70,12 @@ self.addEventListener('activate', event => {
     caches.keys()
       .then(keys => Promise.all(
         keys
-          .filter(key => key.startsWith('gastosmart-') && key !== CACHE_NAME)
+          .filter(
+            key =>
+              key.startsWith('gastosmart-') &&
+              key !== CACHE_STATIC_NAME &&
+              key !== CACHE_DYNAMIC_NAME
+          )
           .map(key => {
             console.log('[SW] Eliminando caché antigua:', key);
             return caches.delete(key);
@@ -88,20 +97,26 @@ self.addEventListener('fetch', event => {
   // Ignorar peticiones no-GET y extensiones del navegador
   if (request.method !== 'GET' || url.protocol === 'chrome-extension:') return;
 
-  // App Shell y recursos CDN → Cache-First
+  // 1) Cache Only para App Shell/CDN ya precargados.
   if (isAppShellRequest(request, url)) {
-    event.respondWith(cacheFirst(request));
+    event.respondWith(cacheOnly(request));
     return;
   }
 
-  // Navegación a documentos HTML → Network-First con fallback offline
+  // 3) Network with cache fallback para navegación HTML.
   if (request.destination === 'document') {
-    event.respondWith(networkFirst(request, true));
+    event.respondWith(networkWithCacheFallback(request, true));
     return;
   }
 
-  // Resto de recursos → Network-First con caché como respaldo
-  event.respondWith(networkFirst(request, false));
+  // 2) Cache with network fallback para recursos estáticos no críticos.
+  if (['style', 'script', 'image', 'font'].includes(request.destination)) {
+    event.respondWith(cacheWithNetworkFallback(request));
+    return;
+  }
+
+  // 3) Network with cache fallback para el resto (api/data/etc).
+  event.respondWith(networkWithCacheFallback(request, false));
 });
 
 // ==================== HELPERS ====================
@@ -112,22 +127,28 @@ function isAppShellRequest(request, url) {
          APP_SHELL.includes(url.href);
 }
 
-/**
- * Cache-First: sirve desde caché; si no está, lo obtiene de la red y lo guarda.
- */
-async function cacheFirst(request) {
+/** 1) Cache Only: responde solo desde caché, sin pedir red. */
+async function cacheOnly(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+  return offlineFallback(request, request.destination === 'document');
+}
+
+/** 2) Cache with network fallback. */
+async function cacheWithNetworkFallback(request) {
   try {
     const cached = await caches.match(request);
     if (cached) return cached;
 
     const response = await fetch(request);
-    if (response && response.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, response.clone());
+    if (shouldCacheResponse(response)) {
+      const cache = await caches.open(CACHE_DYNAMIC_NAME);
+      await cache.put(request, response.clone());
+      await limpiarCache(CACHE_DYNAMIC_NAME, DYNAMIC_CACHE_LIMIT);
     }
     return response;
   } catch (err) {
-    console.warn('[SW] cacheFirst falló:', request.url, err.message);
+    console.warn('[SW] cacheWithNetworkFallback falló:', request.url);
     const cached = await caches.match(request);
     if (cached) return cached;
     return offlineFallback(request);
@@ -135,23 +156,28 @@ async function cacheFirst(request) {
 }
 
 /**
- * Network-First: intenta la red; si falla, sirve desde caché.
- * @param {boolean} isDocument – si es true, sirve offline.html como fallback.
+ * 3) Network with cache fallback: intenta red y, si falla, usa caché.
+ * @param {boolean} isDocument - si es true, usa offline.html como último fallback.
  */
-async function networkFirst(request, isDocument) {
+async function networkWithCacheFallback(request, isDocument) {
   try {
     const response = await fetch(request);
-    if (response && response.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, response.clone());
+    if (shouldCacheResponse(response)) {
+      const cache = await caches.open(CACHE_DYNAMIC_NAME);
+      await cache.put(request, response.clone());
+      await limpiarCache(CACHE_DYNAMIC_NAME, DYNAMIC_CACHE_LIMIT);
     }
     return response;
   } catch (err) {
-    console.warn('[SW] networkFirst falló (sin red):', request.url);
+    console.warn('[SW] networkWithCacheFallback falló (sin red):', request.url);
     const cached = await caches.match(request);
     if (cached) return cached;
     return offlineFallback(request, isDocument);
   }
+}
+
+function shouldCacheResponse(response) {
+  return !!response && (response.ok || response.type === 'opaque');
 }
 
 /**
@@ -170,4 +196,19 @@ function offlineFallback(request, isDocument = false) {
     JSON.stringify({ error: 'Sin conexión', offline: true }),
     { status: 503, headers: { 'Content-Type': 'application/json' } }
   );
+}
+
+/**
+ * Limpia el caché eliminando los elementos más antiguos si supera el límite.
+ * @param {string} cacheName - Nombre del caché a limpiar.
+ * @param {number} nroItems - Número máximo de elementos permitidos en el caché.
+ */
+async function limpiarCache(cacheName, nroItems) {
+  const cache = await caches.open(cacheName);
+  const keys = await cache.keys();
+
+  if (keys.length > nroItems) {
+    await cache.delete(keys[0]);
+    await limpiarCache(cacheName, nroItems);
+  }
 }
